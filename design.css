@@ -1,0 +1,16 @@
+.rectangle {
+    width: 300px; /* Example width */
+    height: 200px; /* Example height */
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-image: url('Screenshot 2023-11-05 at 10.56.12 PM.png'); /* Replace with the actual path to your image */
+    background-size: cover;
+    font-family: Arial, sans-serif;
+    position: relative;
+}
