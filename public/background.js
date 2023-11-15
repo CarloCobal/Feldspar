@@ -50,22 +50,3 @@ function updatePageWithSearchResults(data) {
 }
 
 
-
-// function updatePageWithSearchResults(data) {
-//     for (let i = 0; i < data.results.length; i++) {
-//         const result = data.results[i];
-
-//         // Assuming you have three containers with IDs 'rect1', 'rect2', 'rect3'
-//         const container = document.getElementById(`rect${i + 1}`);
-//         if (container) {
-//             container.style.backgroundImage = `url('${result.imageUrl}')`;
-
-//             const linkElement = document.getElementById(`link${i + 1}`);
-//             if (linkElement) {
-//                 linkElement.href = result.link;
-//                 linkElement.title = result.title; // Optional: Set title attribute for the link
-//             }
-//         }
-//     }
-// }
-

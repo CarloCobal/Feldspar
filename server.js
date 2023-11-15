@@ -9,43 +9,54 @@ app.use(express.json());
 app.use(express.static('public'));
 
 app.post('/search', async (req, res) => {
-    const searchTerm = req.body.searchTerm;
-    console.log("Received search term:", searchTerm);
-
+    console.log("Search endpoint hit with term:", req.body.searchTerm);
     try {
-        const results = await processSearch(searchTerm);
-        res.json({ message: 'Search completed', results: results });
-      } catch (error) {
-        console.error("Error in /search route:", error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        const searchTerm = req.body.searchTerm;
+        const searchResults = await processSearch(searchTerm);
+        res.json({ message: 'Search completed', results: searchResults.results });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred' });
     }
 });
+
 
 async function processSearch(searchTerm) {
     try {
         const chatOutput = await runPythonScript("Ai/simpleChat.py", [searchTerm]);
         console.log("simpleChat.py Output:", chatOutput);
 
-        // Declare the searchResults array to store the results
+        const { firstThree, lastThree } = parseChatOutput(chatOutput);
         const searchResults = [];
 
-        const parsedResults = parseChatOutput(chatOutput);
-
-        for (const result of parsedResults) {
-            const googleSearchOutput = await runPythonScript("./my_googlesearch.py", [result]);
-            console.log(`Top search result for "${result}":`, googleSearchOutput);
-            // Call imgGen.py for each title
-
+        // Process first three for images
+        for (const result of firstThree) {
+            console.log("Generating image for:", result);
             const imageOutput = await runPythonScript("Ai/imgGen.py", [result]);
+
+
+
             const imageUrl = extractImgUrl(imageOutput);
+            if (imageUrl) {
+                searchResults.push({
+                    title: result,
+                    imageUrl: imageUrl,
+                    link: '' // Placeholder for link
+                });
+            } else {
+                console.error("No image URL found for:", result);
+            }
+        }
 
-            // console.log(`Image URL for "${result}":`, imageOutput);
-
-            searchResults.push({
-                title: result,
-                link: googleSearchOutput.top_link,
-                imageUrl: imageUrl // Use the extracted image URL
-            });
+        // Process last three for links, if available
+        if (lastThree && lastThree.length > 0) {
+            for (const result of lastThree) {
+                const googleSearchOutput = await runPythonScript("my_googlesearch.py", [result]);
+                const correspondingResult = searchResults.find(r => r.title === result);
+                if (correspondingResult) {
+                    correspondingResult.link = googleSearchOutput.top_link;
+                }
+            }
         }
 
         return { message: 'Search processed', results: searchResults };
@@ -54,6 +65,8 @@ async function processSearch(searchTerm) {
         throw error;
     }
 }
+
+
 
 
 function runPythonScript(scriptPath, args) {
@@ -78,30 +91,26 @@ function runPythonScript(scriptPath, args) {
 
 
 function parseChatOutput(chatOutput) {
-    const results = [];
-    const searchTerms = chatOutput.split('\n').filter(line => /^\d\./.test(line));
-
-    for (const term of searchTerms) {
-        const match = term.match(/^\d\.\s*(.+)/);
-        if (match && match[1]) {
-            results.push(match[1].trim());
-        }
-    }
-
-    return results;
+    const lines = chatOutput.split('\n').filter(line => /^\d\./.test(line));
+    const firstThree = lines.slice(0, 3);
+    const lastThree = lines.slice(3, 6);
+    console.log("First three for images:", firstThree);
+    console.log("Last three for links:", lastThree);
+    return { firstThree, lastThree };
 }
 
 
 function extractImgUrl(imgGenOutput) {
     try {
-        // Assuming imgGen.py outputs JSON with a structure like { "url": "http://image.url" }
         const imgGenData = JSON.parse(imgGenOutput);
-        return imgGenData.url; // Extract the URL
+        return imgGenData.url;
     } catch (error) {
         console.error("Error parsing image generation output:", error);
-        return null; // Return null or a default image URL if parsing fails
+        return null;
     }
 }
+
+
 
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
