@@ -1,6 +1,5 @@
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
 const { exec } = require("child_process");
 const app = express();
 const port = 3000;
@@ -9,107 +8,81 @@ app.use(express.json());
 app.use(express.static('public'));
 
 app.post('/search', async (req, res) => {
-    console.log("Search endpoint hit with term:", req.body.searchTerm);
+    console.log("Search endpoint hit with term: hello (static for testing)");
     try {
-        const searchTerm = req.body.searchTerm;
-        const searchResults = await processSearch(searchTerm);
-        res.json({ message: 'Search completed', results: searchResults.results });
+        // Using a static input for testing
+        const staticTestInput = "hello";
+        const searchResults = await runPythonScript("/Users/quaidbulloch/Downloads/modified_my_googlesearch.py", [staticTestInput]);
+        if (searchResults) {
+            const parsedResults = JSON.parse(searchResults);
+            res.json({ message: 'Search completed', results: parsedResults });
+        } else {
+            throw new Error("No output from Python script");
+        }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'An error occurred' });
+        res.status(500).json({ error: error.message });
     }
 });
 
-
-async function processSearch(searchTerm) {
-    try {
-        const chatOutput = await runPythonScript("Ai/simpleChat.py", [searchTerm]);
-        console.log("simpleChat.py Output:", chatOutput);
-
-        const { firstThree, lastThree } = parseChatOutput(chatOutput);
-        const searchResults = [];
-
-        // Process first three for images
-        for (const result of firstThree) {
-            console.log("Generating image for:", result);
-            const imageOutput = await runPythonScript("Ai/imgGen.py", [result]);
-
-
-
-            const imageUrl = extractImgUrl(imageOutput);
-            if (imageUrl) {
-                searchResults.push({
-                    title: result,
-                    imageUrl: imageUrl,
-                    link: '' // Placeholder for link
-                });
-            } else {
-                console.error("No image URL found for:", result);
-            }
-        }
-
-        // Process last three for links, if available
-        if (lastThree && lastThree.length > 0) {
-            for (const result of lastThree) {
-                const googleSearchOutput = await runPythonScript("my_googlesearch.py", [result]);
-                const correspondingResult = searchResults.find(r => r.title === result);
-                if (correspondingResult) {
-                    correspondingResult.link = googleSearchOutput.top_link;
-                }
-            }
-        }
-
-        return { message: 'Search processed', results: searchResults };
-    } catch (error) {
-        console.error("Error in processSearch:", error);
-        throw error;
-    }
-}
-
-
-
-
 function runPythonScript(scriptPath, args) {
     return new Promise((resolve, reject) => {
-        const script = exec(`python ${scriptPath}`, (error, stdout, stderr) => {
+        const script = exec(`python3 ${scriptPath} ${args.join(' ')}`, (error, stdout, stderr) => {
             if (error) {
                 console.error(`exec error: ${error}`);
-                return reject(error);
+                return reject(`Error: ${error}`);
             }
-            if (stderr) {
-                console.error(`stderr: ${stderr}`);
-                return reject(stderr);
-            }
+            console.log('stdout:', stdout);
+            console.log('stderr:', stderr);
             resolve(stdout);
         });
-
-        // Write the arguments as input to the script
-        script.stdin.write(args.join(' '));
-        script.stdin.end();
     });
 }
 
+// app.post('/search', async (req, res) => {
+//     console.log("Search endpoint hit with term:", req.body.searchTerm);
+//     try {
+//         const searchTerm = req.body.searchTerm;
+//         const searchResults = await runPythonScript("/Users/quaidbulloch/Downloads/modified_my_googlesearch.py", [searchTerm]);//change this to be agnostic localStorage.
+//         const parsedResults = JSON.parse(searchResults);
+//         res.json({ message: 'Search completed', results: parsedResults });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ error: 'An error occurred' });
+//     }
+// });
 
-function parseChatOutput(chatOutput) {
-    const lines = chatOutput.split('\n').filter(line => /^\d\./.test(line));
-    const firstThree = lines.slice(0, 3);
-    const lastThree = lines.slice(3, 6);
-    console.log("First three for images:", firstThree);
-    console.log("Last three for links:", lastThree);
-    return { firstThree, lastThree };
+// function runPythonScript(scriptPath, args) {
+//     return new Promise((resolve, reject) => {
+//         const script = exec(`python ${scriptPath}`, (error, stdout, stderr) => {
+//             if (error) {
+//                 console.error(`exec error: ${error}`);
+//                 return reject(`Error: ${error}`);
+//             }
+//             if (stderr) {
+//                 console.error(`stderr: ${stderr}`);
+//                 // Only reject if stderr contains actual error messages
+//                 if (isError(stderr)) {
+//                     return reject(`Stderr: ${stderr}`);
+//                 }
+//             }
+//             if (stdout) {
+//                 resolve(stdout);
+//             } else {
+//                 reject('No output from Python script');
+//             }
+//         });
+
+//         script.stdin.write(args.join(' '));
+//         script.stdin.end();
+//     });
+// }
+
+function isError(stderr) {
+    // Implement logic to determine if stderr contains error messages
+    // For example, checking for specific keywords or patterns
+    return stderr.includes("Error") || stderr.includes("Traceback");
 }
-
-
-function extractImgUrl(imgGenOutput) {
-    try {
-        const imgGenData = JSON.parse(imgGenOutput);
-        return imgGenData.url;
-    } catch (error) {
-        console.error("Error parsing image generation output:", error);
-        return null;
-    }
-}
-
 
 
 app.listen(port, () => {
