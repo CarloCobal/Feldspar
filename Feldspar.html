@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=0.7">
   <title>Media Display</title>
-  <link rel="stylesheet" href="design.css"> <!-- Link to your CSS file -->
+  <link rel="stylesheet" href="/design.css"> <!-- Link to your CSS file -->
   <!-- Other head elements -->
 <style>
   body {
@@ -63,46 +63,32 @@
 
 
 <div class="container">
-  <a id="link1" href="https://www.ci.healdsburg.ca.us/411/Healdsburg-History" target="_blank">
-    <div id="rect1" class="rectangle" style="background-image: url('https://oaidalleapiprodscus.blob.core.windows.net/private/org-4OAtU4w8Dcrgyv6hS6wAoI0b/user-ccvP6GnVd9tifqkHAaGiiW2L/img-aJifkRBPgePUrugFwtiLb5ct.png?st=2023-11-11T21%3A38%3A15Z&se=2023-11-11T23%3A38%3A15Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-11-11T21%3A51%3A50Z&ske=2023-11-12T21%3A51%3A50Z&sks=b&skv=2021-08-06&sig=e72iMaZxGx7lExpjKTSChDghHV/gwa1JerD7u9py4es%3D');"></div>
-  </a>
-  <a id="link2" href="https://www.tripadvisor.com/ShowTopic-g32766-i258-k9601712-Calistoga_vs_Healdsburg-Napa_Napa_Valley_California.html" target="_blank">
-    <div id="rect2" class="rectangle" style="background-image: url('https://oaidalleapiprodscus.blob.core.windows.net/private/org-4OAtU4w8Dcrgyv6hS6wAoI0b/user-ccvP6GnVd9tifqkHAaGiiW2L/img-bqIrNe8OexWF1cgY2YqHWuel.png?st=2023-11-11T21%3A38%3A25Z&se=2023-11-11T23%3A38%3A25Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-11-11T21%3A49%3A41Z&ske=2023-11-12T21%3A49%3A41Z&sks=b&skv=2021-08-06&sig=a08QHp4HccSxTHB27qBG6OGy%2Bu8JUocCAvxQ68neNCg%3D');"></div>
-  </a>
-  <a id="link3" href="https://www.jwine.com/" target="_blank">
-    <div id="rect3" class="rectangle" style="background-image: url('https://oaidalleapiprodscus.blob.core.windows.net/private/org-4OAtU4w8Dcrgyv6hS6wAoI0b/user-ccvP6GnVd9tifqkHAaGiiW2L/img-j9nfWnpc3cG0if8Es6rdi6W5.png?st=2023-11-11T21%3A38%3A35Z&se=2023-11-11T23%3A38%3A35Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-11-11T03%3A48%3A25Z&ske=2023-11-12T03%3A48%3A25Z&sks=b&skv=2021-08-06&sig=Qa81BrSlZzt8zVEyvuHjo%2BRBBJPrpv0b17IN7V7mucQ%3D');"></div>
-  </a>
+    <a id="link1" href="#" target="_blank">
+        <div id="rect1" class="rectangle"></div>
+    </a>
+    <a id="link2" href="#" target="_blank">
+        <div id="rect2" class="rectangle"></div>
+    </a>
+    <a id="link3" href="#" target="_blank">
+        <div id="rect3" class="rectangle"></div>
+    </a>
 </div>
 
-<script>
-  function handleKeyPress(event) {
+
+<!-- <div id="resultsContainer" style="margin-top: 20px;">
+</div> -->
+<!-- <script>
+function handleKeyPress(event) {
     if (event.key === "Enter") {
+        console.log("Enter key pressed. Performing search."); // Add this line for debugging
         performSearch();
     }
-  }
-  function performSearch() {
-    const searchTerm = document.getElementById('searchBar').value;
-    
-    fetch('/search', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ searchTerm: searchTerm }),
-    })
-    .then(response => response.text())
-    .then(data => {
-        console.log('Search completed:', data);
-        window.location.reload(); // Reload the page to show updated content
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-    });
+}
 
-    return false; // Prevent default form submission behavior
-  }
-</script>
-  
+</script> -->
+
+<!-- <input type="text" id="searchBar" onkeypress="handleKeyPress(event)"> -->
+<script src="/background.js"></script>
 </body>
 </html>
   </script>
