@@ -1,5 +1,3 @@
-
-
 const express = require('express');
 const path = require('path');
 const { exec } = require("child_process");
@@ -16,9 +14,7 @@ app.post('/search', async (req, res) => {
     try {
         const searchResults = await runPythonScript("modified_my_googlesearch.py", [searchTerm]);
         if (searchResults) {
-            const parsedResults = JSON.parse(searchResults);
-            res.json({ message: 'Search completed', results: parsedResults });
-            console.log(parsedResults);
+            res.json({ message: 'Search completed', results: searchResults });
         } else {
             throw new Error("No output from Python script");
         }
@@ -35,24 +31,17 @@ function runPythonScript(scriptPath, args) {
                 console.error(`exec error: ${error}`);
                 return reject(`Error: ${error}`);
             }
-            console.log('stdout:', stdout); // Log the full stdout for debugging
-            console.log('stderr:', stderr); // Log the stderr
-
+            console.log('stdout:', stdout);
+            console.log('stderr:', stderr);
             try {
-                // Directly parse the stdout assuming it's a valid JSON string
-                const parsed = JSON.parse(stdout.trim());
-                resolve(parsed);
+                resolve(JSON.parse(stdout.trim()));
             } catch (parseError) {
-                console.error(`Error parsing JSON: ${parseError}`, stdout);
+                console.error(`Error parsing JSON: ${parseError}`);
                 reject(`Error parsing JSON: ${parseError}`);
             }
         });
     });
 }
-
-
-
-
 
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
@@ -61,4 +50,3 @@ app.listen(port, () => {
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'Feldspar.html'));
 });
-

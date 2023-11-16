@@ -62,40 +62,54 @@
   <!-- <button onclick="performSearch()">Search</button> -->
 </div>
 
-
 <script>
-  function performSearch() {
-      const searchTerm = document.getElementById('searchBar').value;
   
-      fetch('/search', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ searchTerm: searchTerm }),
-      })
-      .then(response => response.json())
-      .then(data => updateImages(data.results))
-      .catch(error => console.error('Error:', error));
-  }
-  
-  function updateImages(results) {
-      // Update the background images of the rectangles
-      if (results.image_1) document.getElementById('rect1').style.backgroundImage = `url('${results.image_1}')`;
-      if (results.image_2) document.getElementById('rect2').style.backgroundImage = `url('${results.image_2}')`;
-      if (results.image_3) document.getElementById('rect3').style.backgroundImage = `url('${results.image_3}')`;
-  }
-  document.getElementById('searchBar').addEventListener('keypress', function(event) {
-  if (event.key === 'Enter') {
-    performSearch();
-  }
-});
+  let imageCheckInterval;
 
-  </script>
+  function performSearch() {
+    const searchTerm = document.getElementById('searchBar').value;
+
+    fetch('/search', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ searchTerm: searchTerm }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      // Set up an interval to check for images every 5 seconds
+      imageCheckInterval = setInterval(() => checkForImages(data.results), 5000);
+    })
+    .catch(error => console.error('Error:', error));
+  }
+
+  function checkForImages(results) {
+    // Check if the images are ready (add your own logic here)
+    if (results.image_1 && results.image_2 && results.image_3) {
+      updateImages(results);
+      clearInterval(imageCheckInterval); // Stop checking once images are loaded
+    }
+  }
+
+  function updateImages(results) {
+    // Update the background images of the rectangles
+    if (results.image_1) document.getElementById('rect1').style.backgroundImage = `url('${results.image_1}')`;
+    if (results.image_2) document.getElementById('rect2').style.backgroundImage = `url('${results.image_2}')`;
+    if (results.image_3) document.getElementById('rect3').style.backgroundImage = `url('${results.image_3}')`;
+  }
+
+
+  document.getElementById('searchBar').addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+      performSearch();
+    }
+  });
   
+</script>
 
 <div class="container">
-  <a id="https://oaidalleapiprodscus.blob.core.windows.net/private/org-4OAtU4w8Dcrgyv6hS6wAoI0b/user-ccvP6GnVd9tifqkHAaGiiW2L/img-ZpSE5JGgtOjPlvAFk3stJSLW.png?st=2023-11-16T01%3A17%3A06Z&se=2023-11-16T03%3A17%3A06Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-11-16T02%3A17%3A06Z&ske=2023-11-17T02%3A17%3A06Z&sks=b&skv=2021-08-06&sig=cCryBupZd6N5cujYHasA6E4Z5UcnJm8d7EbfaTtyAoc%3D" href="#" target="_blank">
+  <a id="link1" href="#" target="_blank">
       <div id="rect1" class="rectangle"></div>
   </a>
   <a id="link2" href="#" target="_blank">
@@ -106,9 +120,6 @@
   </a>
 </div>
 
-
 <!-- <script src="/background.js"></script> -->
-</body>
-</html>
 </body>
 </html>
