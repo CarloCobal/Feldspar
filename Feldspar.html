@@ -87,58 +87,16 @@
 }
 
 function updateImagesAndLinks(results) {
-    const container = document.querySelector('.container');
-
-    // Clear previous content
-    container.innerHTML = '';
-
     results.forEach((result, index) => {
-        // Create a new link element
-        const newLink = document.createElement('a');
-        newLink.href = result.url;
-        newLink.textContent = result.title; // or use 'Click here for more info' or similar
-        newLink.target = '_blank';
-        newLink.id = `link${index + 1}`;
+        const linkElement = document.getElementById(`link${index + 1}`);
+        const rectangleElement = document.getElementById(`rect${index + 1}`);
 
-        // Create a new rectangle element
-        const newRect = document.createElement('div');
-        newRect.id = `rect${index + 1}`;
-        newRect.className = 'rectangle';
-        newRect.style.backgroundImage = `url('${result.img_url}')`;
-
-        // Append the new rectangle to the link
-        newLink.appendChild(newRect);
-
-        // Append the new link to the container
-        container.appendChild(newLink);
+        if (linkElement && rectangleElement) {
+            rectangleElement.style.backgroundImage = `url('${result.img_url}')`;
+            linkElement.href = result.url;  // This line should update the href
+        }
     });
 }
-
-
-
-// function updateImagesAndLinks(results) {
-//     console.log("Updating images and links with:", results); // Log the results
-
-//     results.forEach((result, index) => {
-//         const linkElement = document.getElementById(`link${index + 1}`);
-//         const rectangleElement = document.getElementById(`rect${index + 1}`);
-
-//         console.log(`Processing result ${index + 1}:`, result);
-
-//         if (linkElement && rectangleElement) {
-//             rectangleElement.style.backgroundImage = `url('${result.img_url}')`;
-//             if (result.url) {
-//                 linkElement.href = result.url;
-//                 console.log(`Updated link${index + 1} href to:`, linkElement.href); // Log the updated href
-//             } else {
-//                 console.log(`No URL found for result ${index + 1}`);
-//             }
-//         } else {
-//             console.log(`Elements not found for result ${index + 1}`);
-//         }
-//     });
-// }
-
 
 document.getElementById('searchBar').addEventListener('keypress', function(event) {
     if (event.key === 'Enter') {
