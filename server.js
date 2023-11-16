@@ -13,6 +13,7 @@ app.post('/search', async (req, res) => {
 
     try {
         const searchResults = await runPythonScript("modified_my_googlesearch.py", [searchTerm]);
+        console.log(searchResults); // Log to verify the structure
         if (searchResults) {
             res.json({ message: 'Search completed', results: searchResults });
         } else {
@@ -33,15 +34,20 @@ function runPythonScript(scriptPath, args) {
             }
             console.log('stdout:', stdout);
             console.log('stderr:', stderr);
+
             try {
-                resolve(JSON.parse(stdout.trim()));
+                // Attempt to parse stdout as JSON
+                const parsedOutput = JSON.parse(stdout.trim());
+                resolve(parsedOutput);
             } catch (parseError) {
                 console.error(`Error parsing JSON: ${parseError}`);
+                console.error(`Problematic output: ${stdout}`);
                 reject(`Error parsing JSON: ${parseError}`);
             }
         });
     });
 }
+
 
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);

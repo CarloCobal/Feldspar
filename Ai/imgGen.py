@@ -4,6 +4,7 @@ import sys
 import json
 import concurrent.futures
 import asyncio
+import backoff
 
 openai.api_key = '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'
 
@@ -20,6 +21,7 @@ def imgGen(imgPrompt):
     # print(json.dumps({"url": img_url}))
 
 # print(imgGen("hi"))
+@backoff.on_exception(backoff.expo, Exception, max_tries=3)
 async def async_imgGen(title):
     loop = asyncio.get_event_loop()
     with concurrent.futures.ThreadPoolExecutor() as pool:

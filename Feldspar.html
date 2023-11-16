@@ -70,41 +70,82 @@
     const searchTerm = document.getElementById('searchBar').value;
 
     fetch('/search', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ searchTerm: searchTerm }),
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ searchTerm: searchTerm }),
     })
     .then(response => response.json())
     .then(data => {
-      // Set up an interval to check for images every 5 seconds
-      imageCheckInterval = setInterval(() => checkForImages(data.results), 5000);
+        console.log("Received data:", data);  // Log the received data
+        if (data && data.results) {
+            updateImagesAndLinks(data.results);
+        }
     })
     .catch(error => console.error('Error:', error));
-  }
+}
 
-  function checkForImages(results) {
-    // Check if the images are ready (add your own logic here)
-    if (results.image_1 && results.image_2 && results.image_3) {
-      updateImages(results);
-      clearInterval(imageCheckInterval); // Stop checking once images are loaded
-    }
-  }
+function updateImagesAndLinks(results) {
+    const container = document.querySelector('.container');
 
-  function updateImages(results) {
-    // Update the background images of the rectangles
-    if (results.image_1) document.getElementById('rect1').style.backgroundImage = `url('${results.image_1}')`;
-    if (results.image_2) document.getElementById('rect2').style.backgroundImage = `url('${results.image_2}')`;
-    if (results.image_3) document.getElementById('rect3').style.backgroundImage = `url('${results.image_3}')`;
-  }
+    // Clear previous content
+    container.innerHTML = '';
+
+    results.forEach((result, index) => {
+        // Create a new link element
+        const newLink = document.createElement('a');
+        newLink.href = result.url;
+        newLink.textContent = result.title; // or use 'Click here for more info' or similar
+        newLink.target = '_blank';
+        newLink.id = `link${index + 1}`;
+
+        // Create a new rectangle element
+        const newRect = document.createElement('div');
+        newRect.id = `rect${index + 1}`;
+        newRect.className = 'rectangle';
+        newRect.style.backgroundImage = `url('${result.img_url}')`;
+
+        // Append the new rectangle to the link
+        newLink.appendChild(newRect);
+
+        // Append the new link to the container
+        container.appendChild(newLink);
+    });
+}
 
 
-  document.getElementById('searchBar').addEventListener('keypress', function(event) {
+
+// function updateImagesAndLinks(results) {
+//     console.log("Updating images and links with:", results); // Log the results
+
+//     results.forEach((result, index) => {
+//         const linkElement = document.getElementById(`link${index + 1}`);
+//         const rectangleElement = document.getElementById(`rect${index + 1}`);
+
+//         console.log(`Processing result ${index + 1}:`, result);
+
+//         if (linkElement && rectangleElement) {
+//             rectangleElement.style.backgroundImage = `url('${result.img_url}')`;
+//             if (result.url) {
+//                 linkElement.href = result.url;
+//                 console.log(`Updated link${index + 1} href to:`, linkElement.href); // Log the updated href
+//             } else {
+//                 console.log(`No URL found for result ${index + 1}`);
+//             }
+//         } else {
+//             console.log(`Elements not found for result ${index + 1}`);
+//         }
+//     });
+// }
+
+
+document.getElementById('searchBar').addEventListener('keypress', function(event) {
     if (event.key === 'Enter') {
       performSearch();
     }
   });
+
   
 </script>
 
@@ -119,7 +160,5 @@
       <div id="rect3" class="rectangle"></div>
   </a>
 </div>
-
-<!-- <script src="/background.js"></script> -->
 </body>
 </html>
