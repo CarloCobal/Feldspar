@@ -19,6 +19,7 @@ def imgGen(imgPrompt):
     return img_url
     # print(json.dumps({"url": img_url}))
 
+# print(imgGen("hi"))
 async def async_imgGen(title):
     loop = asyncio.get_event_loop()
     with concurrent.futures.ThreadPoolExecutor() as pool:

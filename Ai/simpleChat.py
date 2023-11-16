@@ -10,6 +10,7 @@ def general_api_call(user_prompt):
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
+            # "please suggest the best versions or examples of based on the user response. Please only answer in a 1-3 format no labels or other information is needed."#alt to test later"
             {'role': 'system', 'content': "Please make three suggestions 1 to 3, based on the user prompt ranging from what they ought to know (through consensus) to what they want to know. Keep it short and simple. No need to label with consensus or practical information etc."},# This is because three options is simple and it empowers users to have the option to choose productivity through leisure."},
 
             {'role': 'user', 'content': user_prompt}

@@ -2,6 +2,7 @@
 import aiohttp
 import asyncio
 import requests
+import json
 import sys
 sys.path.append('Ai')
 from simpleChat import general_api_call, refinedFilter, parse_questions  # Importing the necessary functions from simpleChat.py
@@ -88,8 +89,9 @@ async def main():
 
 if __name__ == "__main__":
     final_output = asyncio.run(main())
-    print(final_output)
-    
+    # print(final_output)
+    print(json.dumps(final_output))
+
 # async def main():
 #     user_input = "Hello world"
 #     search_results = await perform_searches(user_input)
