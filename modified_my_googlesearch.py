@@ -5,7 +5,8 @@ import requests
 import sys
 sys.path.append('Ai')
 from simpleChat import general_api_call, refinedFilter, parse_questions  # Importing the necessary functions from simpleChat.py
-from imgGen import imgGen
+# from imgGen import imgGen
+from imgGen import imgGenUnrefinedOutput, async_imgGen
 
 async def google_custom_search(query):
     url = "https://www.googleapis.com/customsearch/v1"
@@ -49,14 +50,15 @@ async def perform_searches(user_input):
     return search_results
 
 #Either save title for something down the line or simplify and save in format that will be used in updating the html, right it is needless extra unless there's a use for that elsewhere.
-def imgGenUnrefinedOutput(search_results):
-    output_lines = []  # List to collect output lines
+async def imgGenUnrefinedOutput(search_results):
+    output_lines = []
     for result in search_results:
         title = result['title']
-        img_url = imgGen(title)
+        img_url = await async_imgGen(title)  # Use async_imgGen with await
         output_line = f"Generated image for '{title}': {img_url}"
         output_lines.append(output_line)
-    return '\n'.join(output_lines)  # Combine all lines into one output string
+    return '\n'.join(output_lines)
+ # Combine all lines into one output string
 
         # print(f"Generated image for '{title}': {img_url}")
 """Generated image for 'Here's how AI helps humans make informed decisions | World ...': https://oaidalleapiprodscus.blob.core.windows.net/private/org-4OAtU4w8Dcrgyv6hS6wAoI0b/user-ccvP6GnVd9tifqkHAaGiiW2L/img-YrhUge1XI6MA9MvCCKbj8Chq.png?st=2023-11-15T21%3A30%3A36Z&se=2023-11-15T23%3A30%3A36Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-11-15T22%3A30%3A36Z&ske=2023-11-16T22%3A30%3A36Z&sks=b&skv=2021-08-06&sig=YZQtCccSbbLll4iBCc4rc1DW8JK7w/j168PPXsdn8qw%3D"""
@@ -73,19 +75,30 @@ def parse_image_urls(output):
                 image_dict[key] = url
     return image_dict
 
-if __name__ == "__main__":
-    # Example usage with user input
-    user_input = "Hello world"
-    async def main():
-        search_results = await perform_searches(user_input)
-        img_output = imgGenUnrefinedOutput(search_results)
-        return parse_image_urls(img_output)
+async def main():
+    # Check if a command-line argument is provided
+    if len(sys.argv) > 1:
+        user_input = sys.argv[1]  # Use the first command-line argument as input
+    else:
+        user_input = "default input"  # Default input if no argument is provided
 
-    image_dict = asyncio.run(main())
-    print(image_dict)
-    # user_input = "Your user input here"  # Replace with the actual user input
-    # search_results = perform_searches("hello world")#replace with user_input upon final
-    # print(parse_image_urls(imgGenUnrefinedOutput(search_results)))
+    search_results = await perform_searches(user_input)
+    img_output = await imgGenUnrefinedOutput(search_results)
+    return parse_image_urls(img_output)
+
+if __name__ == "__main__":
+    final_output = asyncio.run(main())
+    print(final_output)
+    
+# async def main():
+#     user_input = "Hello world"
+#     search_results = await perform_searches(user_input)
+#     img_output = await imgGenUnrefinedOutput(search_results)
+#     return parse_image_urls(img_output)
+
+# if __name__ == "__main__":
+#     final_output = asyncio.run(main())
+#     print(final_output)
 
 #new output:
 """{'image_1': 'https://oaidalleapiprodscus.blob.core.windows.net/private/org-4OAtU4w8Dcrgyv6hS6wAoI0b/user-ccvP6GnVd9tifqkHAaGiiW2L/img-VuLRwsglzxkjFDZ8UtTZttNJ.png?st=2023-11-15T22%3A54%3A22Z&se=2023-11-16T00%3A54%3A22Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-11-15T23%3A52%3A52Z&ske=2023-11-16T23%3A52%3A52Z&sks=b&skv=2021-08-06&sig=zPrfH5HRhZo%2ByxxzSyE34uWABzLpfK0BaxWt/QbIhn0%3D', 
