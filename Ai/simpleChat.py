@@ -30,7 +30,7 @@ def refinedFilter(user_prompt):
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
-            {'role': 'system', 'content': "Given the following text, please find three searchable questions that I can ask google. No other text is needed. Label these 1 through 3."},
+            {'role': 'system', 'content': "Given the following text, please find three relevant searchable questions that I can ask google. No other text is needed. Label these 1 through 3."},
             {'role': 'user', 'content': user_prompt}
         ],
         max_tokens=150
@@ -66,3 +66,4 @@ output = """
 if __name__ == "__main__":
     user_input = sys.argv[1] if len(sys.argv) > 1 else "Default User Input"
     parse_questions(refinedFilter(general_api_call(user_input)))
+    print(parse_questions(refinedFilter(general_api_call(user_input))))
