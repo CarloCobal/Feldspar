@@ -63,13 +63,17 @@
 </div>
 
 <script>
-  
+  let searchHistory = [];
   let imageCheckInterval;
 
   function performSearch() {
     const searchTerm = document.getElementById('searchBar').value;
-    performA1Search(searchTerm);
-    performC3Search(searchTerm);
+    if (searchTerm) {
+        searchHistory.push(searchTerm); // Add the search term to the history
+        sendSearchHistoryToServer(); // Send updated history to server
+        performA1Search(searchTerm);
+        performC3Search(searchTerm);
+    }
 }
 function performA1Search(searchTerm) {
     fetch('/search', {
@@ -85,8 +89,11 @@ function performA1Search(searchTerm) {
             const rectA1 = document.getElementById('rectA1');
             const linkA1 = document.getElementById('linkA1');
 
-            if (rectA1) rectA1.style.backgroundImage = `url('${data.screenshotPath}')`;
+            if (rectA1) rectA1.style.backgroundImage = `url('${data.screenshotPath}?t=${Date.now()}')`;
             if (linkA1) linkA1.href = data.url;
+            
+            // Trigger the update for the rectangles
+            updateRectangles();
         }
     })
     .catch(error => console.error('Error:', error));
@@ -103,11 +110,14 @@ function performC3Search(searchTerm) {
     .then(response => response.json())
     .then(data => {
         if (data && data.screenshotPath && data.url) {
-            const rectA1 = document.getElementById('rectC3');
-            const linkA1 = document.getElementById('linkC3');
+            const rectC3 = document.getElementById('rectC3');
+            const linkC3 = document.getElementById('linkC3');
 
-            if (rectC3) rectC3.style.backgroundImage = `url('${data.screenshotPath}')`;
+            if (rectC3) rectC3.style.backgroundImage = `url('${data.screenshotPath}?t=${Date.now()}')`;
             if (linkC3) linkC3.href = data.url;
+            
+            // Trigger the update for the rectangles
+            updateRectangles();
         }
     })
     .catch(error => console.error('Error:', error));
@@ -118,6 +128,19 @@ document.getElementById('searchBar').addEventListener('keypress', function(event
       performSearch();
     }
 });
+function sendSearchHistoryToServer() {
+    fetch('/saveSearchHistory', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ searchHistory: searchHistory }),
+    })
+    .then(response => response.json())
+    .then(data => console.log(data.message))
+    .catch(error => console.error('Error:', error));
+}
+
 
 </script>
 

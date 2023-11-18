@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import { exec } from 'child_process';
 import Pageres from 'pageres';
+import fs from 'fs/promises'; // Use ES6 import for fs as well
 
 const app = express();
 const port = 3000;
@@ -74,3 +75,21 @@ app.listen(port, () => {
 app.get('/', (req, res) => {
     res.sendFile(path.join(process.cwd(), 'Feldspar.html'));
 });
+
+app.post('/saveSearchHistory', async (req, res) => {
+    const history = req.body.searchHistory;
+    try {
+        // Call a function to handle writing to B2loop.py
+        await writeSearchHistoryToFile(history);
+        res.json({ message: 'Search history saved successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+async function writeSearchHistoryToFile(history) {
+    const filePath = 'UserDat/searchHistory.txt'; // Specify the path to your .txt file
+    const fileContent = history.join('\n'); // Join array elements with a newline character
+    await fs.writeFile(filePath, fileContent);
+}
