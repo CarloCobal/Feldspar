@@ -72,6 +72,7 @@
         searchHistory.push(searchTerm); // Add the search term to the history
         sendSearchHistoryToServer(searchTerm); // Send only the latest term
         performA1Search(searchTerm);
+        performB2Search(searchTerm);
         performC3Search(searchTerm);
     }
 }
@@ -99,6 +100,31 @@ function performA1Search(searchTerm) {
     })
     .catch(error => console.error('Error:', error));
 }
+
+function performB2Search(searchTerm) {
+    fetch('/b2search', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ searchTerm: searchTerm }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data && data.screenshotPath && data.url) {
+            const rectB2 = document.getElementById('rectB2');
+            const linkB2 = document.getElementById('linkB2');
+
+            if (rectB2) rectB2.style.backgroundImage = `url('${data.screenshotPath}?t=${Date.now()}')`;
+            if (linkB2) linkB2.href = data.url;
+
+            updateRectangles();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+
 
 function performC3Search(searchTerm) {
     fetch('/search', {
@@ -142,9 +168,7 @@ function sendSearchHistoryToServer(searchTerm) {
     .catch(error => console.error('Error:', error));
 }
 
-
 </script>
-
 <div class="container">
   <a id="linkA1" href="#" target="_blank">
       <div id="rectA1" class="rectangle"></div>
@@ -159,11 +183,14 @@ function sendSearchHistoryToServer(searchTerm) {
 <script>
 function updateRectangles() {
     const rectA1 = document.getElementById('rectA1');
+    const rectB2 = document.getElementById('rectB2');
     const rectC3 = document.getElementById('rectC3');
 
     if (rectA1) rectA1.style.backgroundImage = `url('/A1.png?t=${Date.now()}')`;
+    if (rectB2) rectB2.style.backgroundImage = `url('/B2.png?t=${Date.now()}')`;
     if (rectC3) rectC3.style.backgroundImage = `url('/C3.png?t=${Date.now()}')`;
 }
+
 
 
   // Event listener for DOMContentLoaded

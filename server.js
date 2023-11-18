@@ -45,28 +45,43 @@ app.post('/search', async (req, res) => {
 
 function runPythonScript(scriptPath, args) {
     return new Promise((resolve, reject) => {
-        // Join the arguments with spaces and wrap them in quotes
         const formattedArgs = args.map(arg => `"${arg}"`).join(' ');
         const script = exec(`python3 ${scriptPath} ${formattedArgs}`, (error, stdout, stderr) => {
             if (error) {
                 console.error(`exec error: ${error}`);
                 return reject(`Error: ${error}`);
             }
-            console.log('stdout:', stdout);
-            console.log('stderr:', stderr);
 
             try {
-                // Attempt to parse stdout as JSON
                 const parsedOutput = JSON.parse(stdout.trim());
                 resolve(parsedOutput);
             } catch (parseError) {
                 console.error(`Error parsing JSON: ${parseError}`);
-                console.error(`Problematic output: ${stdout}`);
                 reject(`Error parsing JSON: ${parseError}`);
             }
         });
     });
 }
+
+function runPythonScriptB2(scriptPath, searchTerm) {
+    return new Promise((resolve, reject) => {
+        const script = exec(`python3 ${scriptPath} "${searchTerm}"`, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`exec error: ${error}`);
+                return reject(`Error: ${error}`);
+            }
+
+            try {
+                const parsedOutput = JSON.parse(stdout.trim());
+                resolve(parsedOutput);
+            } catch (parseError) {
+                console.error(`Error parsing JSON: ${parseError}`);
+                reject(`Error parsing JSON: ${parseError}`);
+            }
+        });
+    });
+}
+
 
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
@@ -94,4 +109,46 @@ async function writeSearchHistoryToFile(history) {
     // const fileContent = history.join('\n'); // Join array elements with a newline character
     // await fs.writeFile(filePath, fileContent);
 }
+}
+
+app.post('/b2search', async (req, res) => {
+    const searchTerm = req.body.searchTerm || "default";
+
+    try {
+        // Call B2loop.py with the searchTerm
+        const b2Result = await runPythonScript("Ai/B2loop.py", [searchTerm]);
+
+        if (b2Result && b2Result.result) {
+            // Use the result from B2loop.py as the query for toplink.py
+            const searchResults = await runPythonScript("Ai/toplink.py", ["B2", b2Result.result]);
+
+            if (searchResults && searchResults.url) {
+                // If toplink.py returns a URL, capture a screenshot
+                const screenshotPath = await captureScreenshot(searchResults.url, 'B2');
+                res.json({
+                    message: 'B2 Search completed',
+                    screenshotPath: screenshotPath,
+                    url: searchResults.url
+                });
+            } else {
+                res.json({ error: "Toplink script did not return a valid URL" });
+            }
+        } else {
+            res.json({ error: "B2 script did not return a valid result" });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
+// Helper function to check if a string is a valid URL
+function isValidUrl(string) {
+    try {
+        new URL(string);
+        return true;
+    } catch (_) {
+        return false;
+    }
 }

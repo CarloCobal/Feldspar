@@ -29,4 +29,3 @@ def main(user_input):
     answer2 = call1(input2, context1)
     answer2 = answer2.strip('"')
     return answer2
-
