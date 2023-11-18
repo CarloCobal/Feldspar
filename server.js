@@ -77,11 +77,10 @@ app.get('/', (req, res) => {
 });
 
 app.post('/saveSearchHistory', async (req, res) => {
-    const history = req.body.searchHistory;
+    const term = req.body.searchTerm; // Assuming you send one term at a time
     try {
-        // Call a function to handle writing to B2loop.py
-        await writeSearchHistoryToFile(history);
-        res.json({ message: 'Search history saved successfully' });
+        await writeSearchHistoryToFile([term]); // Pass an array with the single term
+        res.json({ message: 'Search history updated successfully' });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: error.message });
@@ -90,6 +89,9 @@ app.post('/saveSearchHistory', async (req, res) => {
 
 async function writeSearchHistoryToFile(history) {
     const filePath = 'UserDat/searchHistory.txt'; // Specify the path to your .txt file
-    const fileContent = history.join('\n'); // Join array elements with a newline character
-    await fs.writeFile(filePath, fileContent);
+    for (const term of history) {
+        await fs.appendFile(filePath, term + '\n');
+    // const fileContent = history.join('\n'); // Join array elements with a newline character
+    // await fs.writeFile(filePath, fileContent);
+}
 }

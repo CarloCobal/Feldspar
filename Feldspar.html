@@ -70,11 +70,12 @@
     const searchTerm = document.getElementById('searchBar').value;
     if (searchTerm) {
         searchHistory.push(searchTerm); // Add the search term to the history
-        sendSearchHistoryToServer(); // Send updated history to server
+        sendSearchHistoryToServer(searchTerm); // Send only the latest term
         performA1Search(searchTerm);
         performC3Search(searchTerm);
     }
 }
+
 function performA1Search(searchTerm) {
     fetch('/search', {
         method: 'POST',
@@ -128,13 +129,13 @@ document.getElementById('searchBar').addEventListener('keypress', function(event
       performSearch();
     }
 });
-function sendSearchHistoryToServer() {
+function sendSearchHistoryToServer(searchTerm) {
     fetch('/saveSearchHistory', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ searchHistory: searchHistory }),
+        body: JSON.stringify({ searchTerm: searchTerm }),
     })
     .then(response => response.json())
     .then(data => console.log(data.message))

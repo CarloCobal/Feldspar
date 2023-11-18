@@ -1,1 +1,4 @@
-human computer
+hello world
+hows life?
+whats happening?
+what's new
