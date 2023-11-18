@@ -1,18 +1,22 @@
 const express = require('express');
-const path = require('path');
+const path = require('path'); // Ensure this line is present
 const { exec } = require("child_process");
 const app = express();
 const port = 3000;
+
+// ... rest of your server.js code
 
 app.use(express.json());
 app.use(express.static('public'));
 
 app.post('/search', async (req, res) => {
+    const searchMethod = req.body.searchMethod || "A1"; // Default to A1 if not specified
     const searchTerm = req.body.searchTerm || "default";
-    console.log("Search endpoint hit with term:", searchTerm);
+
+    console.log("Search endpoint hit with method:", searchMethod, "and term:", searchTerm);
 
     try {
-        const searchResults = await runPythonScript("modified_my_googlesearch.py", [searchTerm]);
+        const searchResults = await runPythonScript("Ai/toplink.py", [searchMethod, searchTerm]);
         console.log(searchResults); // Log to verify the structure
         if (searchResults) {
             res.json({ message: 'Search completed', results: searchResults });
@@ -27,7 +31,9 @@ app.post('/search', async (req, res) => {
 
 function runPythonScript(scriptPath, args) {
     return new Promise((resolve, reject) => {
-        const script = exec(`python3 ${scriptPath} ${args.join(' ')}`, (error, stdout, stderr) => {
+        // Join the arguments with spaces and wrap them in quotes
+        const formattedArgs = args.map(arg => `"${arg}"`).join(' ');
+        const script = exec(`python3 ${scriptPath} ${formattedArgs}`, (error, stdout, stderr) => {
             if (error) {
                 console.error(`exec error: ${error}`);
                 return reject(`Error: ${error}`);
@@ -47,7 +53,6 @@ function runPythonScript(scriptPath, args) {
         });
     });
 }
-
 
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);

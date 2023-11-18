@@ -68,41 +68,61 @@
 
   function performSearch() {
     const searchTerm = document.getElementById('searchBar').value;
+    performA1Search(searchTerm);
+    performC3Search(searchTerm);
+}
 
+function performA1Search(searchTerm) {
     fetch('/search', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ searchTerm: searchTerm }),
+        body: JSON.stringify({ searchMethod: 'A1', searchTerm: searchTerm }),
     })
     .then(response => response.json())
     .then(data => {
-        console.log("Received data:", data);  // Log the received data
         if (data && data.results) {
-            updateImagesAndLinks(data.results);
+            updateRectangle('rect1', data.results);
         }
     })
     .catch(error => console.error('Error:', error));
 }
 
-function updateImagesAndLinks(results) {
-    results.forEach((result, index) => {
-        const linkElement = document.getElementById(`link${index + 1}`);
-        const rectangleElement = document.getElementById(`rect${index + 1}`);
-
-        if (linkElement && rectangleElement) {
-            rectangleElement.style.backgroundImage = `url('${result.img_url}')`;
-            linkElement.href = result.url;  // This line should update the href
+function performC3Search(searchTerm) {
+    fetch('/search', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ searchMethod: 'C3', searchTerm: searchTerm }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data && data.results) {
+            updateRectangle('rect3', data.results);
         }
-    });
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function updateRectangle(rectangleId, result) {
+    const rectangleElement = document.getElementById(rectangleId);
+    if (rectangleElement) {
+        rectangleElement.style.backgroundImage = `url('${result.img_url}')`;
+        const linkElement = rectangleElement.parentNode;
+        if (linkElement) {
+            linkElement.href = result.url;
+        }
+    }
 }
 
 document.getElementById('searchBar').addEventListener('keypress', function(event) {
     if (event.key === 'Enter') {
       performSearch();
     }
-  });
+});
+
 
   
 </script>

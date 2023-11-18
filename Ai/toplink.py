@@ -3,6 +3,7 @@ import aiohttp
 import asyncio
 from A1Loop import main
 import sys
+import json
 
 async def google_custom_search(query):
     url = "https://www.googleapis.com/customsearch/v1"
@@ -24,22 +25,18 @@ user_input="top ten tech startups"
 async def A1_search(user_input):
     """This seems to excell more than C3 at short search phrases, but I only did a few tests"""
     query = main(user_input)
-    # print(f"Query from main: '{query}'")
-
-    # Use this query in the Google custom search
     top_link = await google_custom_search(query)
     if top_link:
-        return top_link
+        print(json.dumps({'url': top_link}))  # Print as JSON
     else:
-        print("No results found.")
-
-# asyncio.run(A1_search(user_input))
-
+        print(json.dumps({'error': "No results found."}))
 
 async def C3_search(user_input):
-    return await google_custom_search(user_input) #change to return if not using stdout reader later. Might be simpler.
-
-# asyncio.run(C3_search(user_input))
+    top_link = await google_custom_search(user_input)
+    if top_link:
+        print(json.dumps({'url': top_link}))  # Print as JSON
+    else:
+        print(json.dumps({'error': "No results found."}))
 
 if __name__ == "__main__":
     if len(sys.argv) > 2:
