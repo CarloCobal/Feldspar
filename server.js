@@ -1,27 +1,40 @@
-const express = require('express');
-const path = require('path'); // Ensure this line is present
-const { exec } = require("child_process");
+import express from 'express';
+import path from 'path';
+import { exec } from 'child_process';
+import Pageres from 'pageres';
+
 const app = express();
 const port = 3000;
-
-// ... rest of your server.js code
 
 app.use(express.json());
 app.use(express.static('public'));
 
-app.post('/search', async (req, res) => {
-    const searchMethod = req.body.searchMethod || "A1"; // Default to A1 if not specified
-    const searchTerm = req.body.searchTerm || "default";
+async function captureScreenshot(url, searchMethod) {
+    const filename = `${searchMethod}.png`; // Filename will be either A1.png or C3.png
+    
+    await new Pageres({ delay: 2 })
+        .source(url, ['1280x1024'], { crop: true, filename: searchMethod }) // Set filename based on searchMethod
+        .destination('public') // Saving in the 'public' directory
+        .run();
 
-    console.log("Search endpoint hit with method:", searchMethod, "and term:", searchTerm);
+    return `/${filename}`; // Return the path relative to the public directory
+}
+
+app.post('/search', async (req, res) => {
+    const searchMethod = req.body.searchMethod || "A1"; // Example: "A1" or "C3"
+    const searchTerm = req.body.searchTerm || "default";
 
     try {
         const searchResults = await runPythonScript("Ai/toplink.py", [searchMethod, searchTerm]);
-        console.log(searchResults); // Log to verify the structure
-        if (searchResults) {
-            res.json({ message: 'Search completed', results: searchResults });
+        if (searchResults && searchResults.url) {
+            const screenshotPath = await captureScreenshot(searchResults.url, searchMethod);
+            res.json({
+                message: 'Search completed',
+                screenshotPath: screenshotPath,
+                url: searchResults.url
+            });
         } else {
-            throw new Error("No output from Python script");
+            throw new Error("No valid URL from Python script");
         }
     } catch (error) {
         console.error(error);
@@ -59,5 +72,5 @@ app.listen(port, () => {
 });
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'Feldspar.html'));
+    res.sendFile(path.join(process.cwd(), 'Feldspar.html'));
 });

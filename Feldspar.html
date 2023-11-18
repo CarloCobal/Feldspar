@@ -71,7 +71,6 @@
     performA1Search(searchTerm);
     performC3Search(searchTerm);
 }
-
 function performA1Search(searchTerm) {
     fetch('/search', {
         method: 'POST',
@@ -82,8 +81,12 @@ function performA1Search(searchTerm) {
     })
     .then(response => response.json())
     .then(data => {
-        if (data && data.results) {
-            updateRectangle('rect1', data.results);
+        if (data && data.screenshotPath && data.url) {
+            const rectA1 = document.getElementById('rectA1');
+            const linkA1 = document.getElementById('linkA1');
+
+            if (rectA1) rectA1.style.backgroundImage = `url('${data.screenshotPath}')`;
+            if (linkA1) linkA1.href = data.url;
         }
     })
     .catch(error => console.error('Error:', error));
@@ -99,22 +102,15 @@ function performC3Search(searchTerm) {
     })
     .then(response => response.json())
     .then(data => {
-        if (data && data.results) {
-            updateRectangle('rect3', data.results);
+        if (data && data.screenshotPath && data.url) {
+            const rectA1 = document.getElementById('rectC3');
+            const linkA1 = document.getElementById('linkC3');
+
+            if (rectC3) rectC3.style.backgroundImage = `url('${data.screenshotPath}')`;
+            if (linkC3) linkC3.href = data.url;
         }
     })
     .catch(error => console.error('Error:', error));
-}
-
-function updateRectangle(rectangleId, result) {
-    const rectangleElement = document.getElementById(rectangleId);
-    if (rectangleElement) {
-        rectangleElement.style.backgroundImage = `url('${result.img_url}')`;
-        const linkElement = rectangleElement.parentNode;
-        if (linkElement) {
-            linkElement.href = result.url;
-        }
-    }
 }
 
 document.getElementById('searchBar').addEventListener('keypress', function(event) {
@@ -123,20 +119,31 @@ document.getElementById('searchBar').addEventListener('keypress', function(event
     }
 });
 
-
-  
 </script>
 
 <div class="container">
-  <a id="link1" href="#" target="_blank">
-      <div id="rect1" class="rectangle"></div>
+  <a id="linkA1" href="#" target="_blank">
+      <div id="rectA1" class="rectangle"></div>
   </a>
-  <a id="link2" href="#" target="_blank">
-      <div id="rect2" class="rectangle"></div>
-  </a>
-  <a id="link3" href="#" target="_blank">
-      <div id="rect3" class="rectangle"></div>
+  <a id="linkB2" href="#" target="_blank">
+    <div id="rectB2" class="rectangle"></div>
+</a>
+  <a id="linkC3" href="#" target="_blank">
+      <div id="rectC3" class="rectangle"></div>
   </a>
 </div>
+<script>
+function updateRectangles() {
+    const rectA1 = document.getElementById('rectA1');
+    const rectC3 = document.getElementById('rectC3');
+
+    if (rectA1) rectA1.style.backgroundImage = `url('/A1.png?t=${Date.now()}')`;
+    if (rectC3) rectC3.style.backgroundImage = `url('/C3.png?t=${Date.now()}')`;
+}
+
+
+  // Event listener for DOMContentLoaded
+  document.addEventListener('DOMContentLoaded', updateRectangles);
+</script>
 </body>
 </html>

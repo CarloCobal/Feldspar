@@ -8,10 +8,11 @@ import json
 async def google_custom_search(query):
     url = "https://www.googleapis.com/customsearch/v1"
     params = {
-        "key": 'AIzaSyCqrnzM-GLKIZalq_AmA3uvpuchiZJZQLQ',
-        "cx": '94eb91fc4b7e143e4',
+        "key": 'AIzaSyA6kLTjTgsI28n13xFoZKVMM-PHDC4AR-I',
+        "cx": 'c26f4856565da4bf3',
         "q": query
     }
+    
     
     async with aiohttp.ClientSession() as session:
         async with session.get(url, params=params) as response:
