@@ -2,6 +2,8 @@
 import aiohttp
 import asyncio
 from A1Loop import main
+import sys
+
 async def google_custom_search(query):
     url = "https://www.googleapis.com/customsearch/v1"
     params = {
@@ -17,15 +19,42 @@ async def google_custom_search(query):
             top_link = data['items'][0]['link'] if 'items' in data and len(data['items']) > 0 else None
             return top_link
 
-async def search(user_input):
+user_input="top ten tech startups"
+
+async def A1_search(user_input):
+    """This seems to excell more than C3 at short search phrases, but I only did a few tests"""
     query = main(user_input)
-    print(f"Query from main: '{query}'")
+    # print(f"Query from main: '{query}'")
 
     # Use this query in the Google custom search
     top_link = await google_custom_search(query)
     if top_link:
-        print(top_link)
+        return top_link
     else:
         print("No results found.")
 
-asyncio.run(search(user_input="top ten tech startups"))
+# asyncio.run(A1_search(user_input))
+
+
+async def C3_search(user_input):
+    return await google_custom_search(user_input) #change to return if not using stdout reader later. Might be simpler.
+
+# asyncio.run(C3_search(user_input))
+
+if __name__ == "__main__":
+    if len(sys.argv) > 2:
+        user_input = sys.argv[2]
+        search_method = sys.argv[1]
+
+        if search_method == "A1":
+            asyncio.run(A1_search(user_input))
+        elif search_method == "C3":
+            asyncio.run(C3_search(user_input))
+        else:
+            print("Invalid search method. Please specify 'A1' or 'C3'.")
+    else:
+        print("Please provide the search method ('A1' or 'C3') and a search query as arguments.")
+
+#run example:
+# python toplink.py A1 "top ten tech startups"
+# python toplink.py C3 "top ten tech startups"
