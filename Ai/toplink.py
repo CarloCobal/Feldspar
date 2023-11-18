@@ -1,6 +1,7 @@
+#Receives A1loop to search after the question was refined. Gets google top link and requires user input.
 import aiohttp
 import asyncio
-
+from A1Loop import main
 async def google_custom_search(query):
     url = "https://www.googleapis.com/customsearch/v1"
     params = {
@@ -16,14 +17,15 @@ async def google_custom_search(query):
             top_link = data['items'][0]['link'] if 'items' in data and len(data['items']) > 0 else None
             return top_link
 
-# Example usage
-async def main():
-    query = "example search query"  # Replace with your actual query
+async def search(user_input):
+    query = main(user_input)
+    print(f"Query from main: '{query}'")
+
+    # Use this query in the Google custom search
     top_link = await google_custom_search(query)
     if top_link:
         print(top_link)
     else:
         print("No results found.")
 
-# Run the async main function
-asyncio.run(main())
+asyncio.run(search(user_input="top ten tech startups"))
