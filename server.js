@@ -3,8 +3,11 @@ import path from 'path';
 import { exec } from 'child_process';
 import Pageres from 'pageres';
 import fs from 'fs/promises'; // Use ES6 import for fs as well
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
+const openaiApiKeys = process.env.OPENAI_API_KEYS.split(';');
 const port = 3000;
 
 app.use(express.json());
@@ -14,7 +17,7 @@ async function captureScreenshot(url, searchMethod) {
     const filename = `${searchMethod}.png`; // Filename will be either A1.png or C3.png
     
     await new Pageres({ delay: 2 })
-        .source(url, ['1560x1024'], { crop: true, filename: searchMethod }) // Set filename based on searchMethod
+        .source(url, ['1560x1216'], { crop: true, filename: searchMethod }) // Set filename based on searchMethod
         .destination('public') // Saving in the 'public' directory
         .run();
 
