@@ -8,6 +8,29 @@ import json
 import B2loop
 from urllib.parse import urlparse
 import logging
+import requests
+
+import requests
+
+async def palm_search(user_input):
+    api_key = 'AIzaSyDvnKzhAEh5EnrYoy7wvS1_MMcD3pcRG6M'
+    url = "https://generativelanguage.googleapis.com/v1beta3/models/text-bison-001:generateText"
+    headers = {
+        "Content-Type": "application/json",
+        "x-goog-api-key": api_key
+    }
+    data = {
+        "prompt": {"text": user_input}
+    }
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, json=data, headers=headers) as response:
+            if response.status == 200:
+                json_response = await response.json()
+                if 'candidates' in json_response and json_response['candidates']:
+                    output = json_response['candidates'][0]['output']
+                    return output
+            return None
+
 def is_valid_url(url):
     try:
         result = urlparse(url)
@@ -58,6 +81,7 @@ async def A1_search(user_input):
     else:
         print(json.dumps({'error': "No results found."}))
 
+
 async def C3_search(user_input):
     top_link = await google_custom_search(user_input)
     if top_link:
@@ -65,26 +89,58 @@ async def C3_search(user_input):
     else:
         print(json.dumps({'error': "No results found."}))
 
+# if __name__ == "__main__":
+#     if len(sys.argv) > 2:
+#         user_input = sys.argv[2]
+#         search_method = sys.argv[1]
+
+#         # Check if user_input is empty
+#         if user_input.strip() == "":
+#             print(json.dumps({'error': "Empty search term provided."}))
+#         else:
+#             if search_method == "A1":
+#                 # asyncio.run(A1_search(user_input))
+#                 result = asyncio.run(A1_search(palm_search(user_input)))
+#                 if result:
+#                     print(json.dumps({'output': result}))
+#                 else:
+#                     print(json.dumps({'error': "No results found."}))
+#             elif search_method == "B2":
+#                 asyncio.run(B2_search(user_input))
+#             elif search_method == "C3":
+#                 asyncio.run(C3_search(user_input))
+#             else:
+#                 print("Invalid search method. Please specify 'A1', 'B2', 'C3', or 'palm'.")
+#     else:
+#         print("Please provide the search method ('A1', 'B2', or 'C3') and a search query as arguments.")
+
 if __name__ == "__main__":
     if len(sys.argv) > 2:
         user_input = sys.argv[2]
         search_method = sys.argv[1]
 
-        # Check if user_input is empty
         if user_input.strip() == "":
             print(json.dumps({'error': "Empty search term provided."}))
         else:
             if search_method == "A1":
-                asyncio.run(A1_search(user_input))
+                palm_result = asyncio.run(palm_search(user_input))
+                if palm_result:
+                    # Ensure palm_result is a string suitable for a search query
+                    A1_result = asyncio.run(A1_search(palm_result))
+                    if A1_result:
+                        print(json.dumps({'output': A1_result}))
+                    else:
+                        print(json.dumps({'error': "No results found."}))
+                else:
+                    print(json.dumps({'error': "No results from palm search."}))
             elif search_method == "B2":
                 asyncio.run(B2_search(user_input))
             elif search_method == "C3":
                 asyncio.run(C3_search(user_input))
             else:
-                print("Invalid search method. Please specify 'A1', 'B2', or 'C3'.")
+                print("Invalid search method. Please specify 'A1', 'B2', 'C3', or 'palm'.")
     else:
-        print("Please provide the search method ('A1', 'B2', or 'C3') and a search query as arguments.")
-
+        print("Please provide the search method ('A1', 'B2', 'C3', or 'palm') and a search query as arguments.")
 
 #run example:
 # python toplink.py A1 "top ten tech startups"
