@@ -24,6 +24,12 @@ async function captureScreenshot(url, searchMethod) {
     return `/${filename}`; // Return the path relative to the public directory
 }
 
+function saveUrlInCookie(method, url) {
+    const expiryDate = new Date();
+    expiryDate.setTime(expiryDate.getTime() + (365*24*60*60*1000)); // 1 year for example
+    const expires = "expires="+ expiryDate.toUTCString();
+    document.cookie = method + "=" + url + ";" + expires + ";path=/";
+}
 app.post('/search', async (req, res) => {
     const searchMethod = req.body.searchMethod || "A1"; // Example: "A1" or "C3"
     const searchTerm = req.body.searchTerm || "default";
@@ -32,16 +38,24 @@ app.post('/search', async (req, res) => {
         const searchResults = await runPythonScript("Ai/toplink.py", [searchMethod, searchTerm]);
         if (searchResults && searchResults.url) {
             const screenshotPath = await captureScreenshot(searchResults.url, searchMethod);
+
+            if (searchMethod === 'A1') {
+                res.cookie('A1', searchResults.url, { maxAge: 365 * 24 * 60 * 60 * 1000, httpOnly: true });
+            }
+
+            // Make sure the response is only sent once
             res.json({
                 message: 'Search completed',
                 screenshotPath: screenshotPath,
                 url: searchResults.url
             });
         } else {
+            // Only one response should be here
             throw new Error("No valid URL from Python script");
         }
     } catch (error) {
         console.error(error);
+        // Make sure this is the only place in this block sending a response
         res.status(500).json({ error: error.message });
     }
 });
@@ -128,6 +142,7 @@ app.post('/b2search', async (req, res) => {
             if (searchResults && searchResults.url) {
                 // If toplink.py returns a URL, capture a screenshot
                 const screenshotPath = await captureScreenshot(searchResults.url, 'B2');
+                saveUrlInCookie('B2', data.url); // Save A1 URL in a cookie
                 res.json({
                     message: 'B2 Search completed',
                     screenshotPath: screenshotPath,

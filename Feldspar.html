@@ -89,6 +89,7 @@ function performA1Search(searchTerm) {
     .then(response => response.json())
     .then(data => {
         if (data && data.screenshotPath && data.url) {
+            setUrlInCookie('A1', data.url);  // for A1 search
             const rectA1 = document.getElementById('rectA1');
             const linkA1 = document.getElementById('linkA1');
 
@@ -113,6 +114,8 @@ function performB2Search(searchTerm) {
     .then(response => response.json())
     .then(data => {
         if (data && data.screenshotPath && data.url) {
+            setUrlInCookie('B2', data.url);  
+
             const rectB2 = document.getElementById('rectB2');
             const linkB2 = document.getElementById('linkB2');
 
@@ -126,7 +129,6 @@ function performB2Search(searchTerm) {
 }
 
 
-
 function performC3Search(searchTerm) {
     fetch('/search', {
         method: 'POST',
@@ -138,6 +140,7 @@ function performC3Search(searchTerm) {
     .then(response => response.json())
     .then(data => {
         if (data && data.screenshotPath && data.url) {
+            setUrlInCookie('C3', data.url);  
             const rectC3 = document.getElementById('rectC3');
             const linkC3 = document.getElementById('linkC3');
 
@@ -149,7 +152,14 @@ function performC3Search(searchTerm) {
         }
     })
     .catch(error => console.error('Error:', error));
+  }
+  function setUrlInCookie(name, url) {
+    const expiryDate = new Date();
+    expiryDate.setTime(expiryDate.getTime() + (24 * 60 * 60 * 1000)); // 24 hours from now
+    const expires = "expires=" + expiryDate.toUTCString();
+    document.cookie = `${name}=${url}; ${expires}; path=/`;
 }
+
 
 document.getElementById('searchBar').addEventListener('keypress', function(event) {
     if (event.key === 'Enter') {
@@ -169,6 +179,17 @@ function sendSearchHistoryToServer(searchTerm) {
     .catch(error => console.error('Error:', error));
 }
 
+function getUrlFromCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+}
+
 </script>
 <div class="container">
   <a id="linkA1" href="#" target="_blank">
@@ -182,18 +203,21 @@ function sendSearchHistoryToServer(searchTerm) {
   </a>
 </div>
 <script>
-function updateRectangles() {
-    const rectA1 = document.getElementById('rectA1');
-    const rectB2 = document.getElementById('rectB2');
-    const rectC3 = document.getElementById('rectC3');
+document.addEventListener('DOMContentLoaded', function() {
+    updateRectangles();
 
-    if (rectA1) rectA1.style.backgroundImage = `url('/A1.png?t=${Date.now()}')`;
-    if (rectB2) rectB2.style.backgroundImage = `url('/B2.png?t=${Date.now()}')`;
-    if (rectC3) rectC3.style.backgroundImage = `url('/C3.png?t=${Date.now()}')`;
-}
+    const urlA1 = getUrlFromCookie('A1');
+    const urlB2 = getUrlFromCookie('B2');
+    const urlC3 = getUrlFromCookie('C3');
+
+    if (urlA1) document.getElementById('linkA1').href = urlA1;
+    if (urlB2) document.getElementById('linkB2').href = urlB2;
+    if (urlC3) document.getElementById('linkC3').href = urlC3;
+});
+
 
   // Event listener for DOMContentLoaded
-  document.addEventListener('DOMContentLoaded', updateRectangles);
+  // document.addEventListener('DOMContentLoaded', updateRectangles);
 </script>
 </body>
 </html>
