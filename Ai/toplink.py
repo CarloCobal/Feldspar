@@ -7,7 +7,7 @@ import sys
 import json
 import B2loop
 from urllib.parse import urlparse
-
+import logging
 def is_valid_url(url):
     try:
         result = urlparse(url)
@@ -15,21 +15,29 @@ def is_valid_url(url):
     except ValueError:
         return False
 
-async def google_custom_search(query):
+async def google_custom_search(query, max_retries=3):
     url = "https://www.googleapis.com/customsearch/v1"
     params = {
         "key": 'AIzaSyA6kLTjTgsI28n13xFoZKVMM-PHDC4AR-I',
         "cx": 'c53f271da46c84856',
         "q": query
     } 
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, params=params) as response:
-            data = await response.json()
-            top_link = data['items'][0]['link'] if 'items' in data and len(data['items']) > 0 else None
-            if top_link and is_valid_url(top_link):
-                return top_link
-            else:
-                return None
+    for attempt in range(max_retries):
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, params=params) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        top_link = data['items'][0]['link'] if 'items' in data and len(data['items']) > 0 else None
+                        if top_link and is_valid_url(top_link):
+                            return top_link
+                    else:
+                        logging.warning(f"Attempt {attempt+1}: API request failed with status {response.status}")
+                        # Optionally, add a delay here if needed
+        except Exception as e:
+            logging.warning(f"Attempt {attempt+1} failed with error: {e}")
+            # Optionally, add a delay here if needed
+    return None
 
 # user_input="top ten tech startups"
 
