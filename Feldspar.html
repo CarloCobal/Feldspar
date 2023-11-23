@@ -4,13 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=0.7">
   <title>Media Display</title>
-  <link rel="stylesheet" href="/design.css"> <!-- Link to your CSS file -->
+  <link rel="stylesheet" href="public/design.css"> <!-- Link to your CSS file -->
   <!-- Other head elements -->
 <style>
   body {
     margin: 0;
     padding: 0;
-    background-image: url('Screenshot 2023-11-05 at 10.56.12 PM.png');
+    background-image: url('public/Screenshot 2023-11-05 at 10.56.12 PM.png');
     background-size: cover;
     font-family: Arial, sans-serif;
     position: relative;
@@ -187,13 +187,15 @@ function updateRectangles() {
     const rectB2 = document.getElementById('rectB2');
     const rectC3 = document.getElementById('rectC3');
 
-    if (rectA1) rectA1.style.backgroundImage = `url('/A1.png?t=${Date.now()}')`;
-    if (rectB2) rectB2.style.backgroundImage = `url('/B2.png?t=${Date.now()}')`;
-    if (rectC3) rectC3.style.backgroundImage = `url('/C3.png?t=${Date.now()}')`;
-}
+    
+    if (rectA1) rectA1.style.backgroundImage = `url('public/A1.png?t=${Date.now()}')`;
+    if (rectB2) rectB2.style.backgroundImage = `url('public/B2.png?t=${Date.now()}')`;
+    if (rectC3) rectC3.style.backgroundImage = `url('public/C3.png?t=${Date.now()}')`;
+
+  }
 
   // Event listener for DOMContentLoaded
-  document.addEventListener('DOMContentLoaded', updateRectangles);
+  document.addEventListener('DOMContentLoaded', updateRectangles());
 </script>
 </body>
 </html>

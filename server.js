@@ -6,12 +6,24 @@ import fs from 'fs/promises'; // Use ES6 import for fs as well
 import dotenv from 'dotenv';
 dotenv.config();
 
+async function clearSearchHistory() {
+    try {
+        // Assuming the file path is correct
+        const filePath = 'UserDat/searchHistory.txt';
+        await fs.writeFile(filePath, ''); // Clear the file
+        console.log('Search history cleared');
+    } catch (error) {
+        console.error('Error clearing search history:', error);
+    }
+}
+
 const app = express();
 const openaiApiKeys = process.env.OPENAI_API_KEYS.split(';');
 const port = 3000;
 
 app.use(express.json());
 app.use(express.static('public'));
+
 
 async function captureScreenshot(url, searchMethod) {
     const filename = `${searchMethod}.png`; // Filename will be either A1.png or C3.png
@@ -85,13 +97,15 @@ function runPythonScriptB2(scriptPath, searchTerm) {
     });
 }
 
+// Schedule the search history clearance every hour
+setInterval(clearSearchHistory, 3600000);
 
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(process.cwd(), 'Feldspar.html'));
+    res.sendFile(path.join(process.cwd(), 'public/Feldspar.html'));
 });
 
 app.post('/saveSearchHistory', async (req, res) => {
